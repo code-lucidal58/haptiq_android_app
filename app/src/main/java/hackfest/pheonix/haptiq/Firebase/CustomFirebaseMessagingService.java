@@ -1,4 +1,4 @@
-package hackfest.pheonix.haptiq;
+package hackfest.pheonix.haptiq.Firebase;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,6 +11,10 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
+import hackfest.pheonix.haptiq.Activities.MainActivity;
+import hackfest.pheonix.haptiq.Constants;
+import hackfest.pheonix.haptiq.R;
 
 /**
  * Created by aanisha
@@ -30,6 +34,7 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
         sendNotification(remoteMessage.getNotification().getBody());
     }
 
+
     //This method is only generating push notification
     //It is same as we did in earlier posts
     private void sendNotification(String messageBody) {
@@ -38,10 +43,10 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Firebase Push Notification")
+                .setContentTitle(Constants.APP)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
@@ -51,5 +56,6 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0, notificationBuilder.build());
+        MyWakefulBroadcastReceiver.completeWakefulIntent(intent);
     }
 }

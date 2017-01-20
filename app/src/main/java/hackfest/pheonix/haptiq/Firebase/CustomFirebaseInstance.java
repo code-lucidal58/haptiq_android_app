@@ -1,4 +1,4 @@
-package hackfest.pheonix.haptiq;
+package hackfest.pheonix.haptiq.Firebase;
 
 import android.util.Log;
 
