@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("demo", "QR read result " + qrCodeResult);
                 try {
                     JSONObject object = new JSONObject(qrCodeResult);
+                    Log.e("qr chromeId check", object.optString(Constants.CHROME_EXTENSION_ID));
                     sharedPreferences.edit().putString(Constants.CHROME_EXTENSION_ID, object.optString(Constants.CHROME_EXTENSION_ID)).apply();
                     String secretKey = object.optString(Constants.SECRET_KEY);
                     String encryptedKey = null;
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("demo", jsonObject.toString());
                 // Send request for pairing
                 mSocket.emit("pairing", jsonObject);
-                sharedPreferences.edit().putString(Constants.CHROME_EXTENSION_ID, qrCodeResult).apply();
                 startActivity(new Intent(MainActivity.this, AccessCredential.class));
                 finish();
             }

@@ -18,4 +18,6 @@ public class Constants {
     public static final String CHROME_EXTENSION_ID = "chromeId";
     public static final String FCM_ID = "fcmId";
     public static final String SECRET_KEY = "secretKey";
+
+    public static final String TO_SEARCH_URL = "toSearchUrl";
 }

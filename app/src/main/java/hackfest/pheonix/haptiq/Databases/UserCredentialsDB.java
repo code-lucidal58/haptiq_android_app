@@ -67,12 +67,12 @@ public class UserCredentialsDB extends SQLiteOpenHelper{
     }
 
     // Getting single credential
-    UserCredential getCredential(int id) {
+    public UserCredential getCredential(String url) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME, new String[] { KEY_ID,
-                        KEY_USERNAME, KEY_PASSWORD, KEY_URL}, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
+                        KEY_USERNAME, KEY_PASSWORD, KEY_URL}, KEY_URL + "=?",
+                new String[] { url }, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 

@@ -10,6 +10,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 
+import com.github.nkzawa.socketio.client.Socket;
+
+import hackfest.pheonix.haptiq.Constants;
+import hackfest.pheonix.haptiq.Databases.UserCredentialsDB;
+import hackfest.pheonix.haptiq.Encryption;
+import hackfest.pheonix.haptiq.Models.UserCredential;
 import hackfest.pheonix.haptiq.R;
 
 /**
@@ -22,6 +28,7 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     private Context context;
     private FingerprintManager manager;
     FingerprintManager.CryptoObject cryptoObject;
+    Socket socket;
 
     // Constructor
     public FingerprintHandler(Context mContext) {
@@ -29,9 +36,10 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     }
 
 
-    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject) {
+    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject, Socket socket) {
         this.manager = manager;
         this.cryptoObject = cryptoObject;
+        this.socket=socket;
         CancellationSignal cancellationSignal = new CancellationSignal();
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -64,11 +72,19 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     }
 
 
-    public void update(String e, Boolean success){
+    private void update(String e, Boolean success){
         TextView textView = (TextView) ((Activity)context).findViewById(R.id.errorText);
         textView.setText(e);
         if(success){
             textView.setTextColor(ContextCompat.getColor(context,R.color.colorPrimaryDark));
+            UserCredentialsDB userCredentialsDB = new UserCredentialsDB(context);
+            UserCredential uc = userCredentialsDB.getCredential(context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
+                    .getString(Constants.TO_SEARCH_URL,""));
+            String username = uc.getUsername();
+            String encryptedPassword = uc.getPassword();
+            String encryptedKey =context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
+                    .getString(Constants.SECRET_KEY,"");
+            socket.emit("mobile-authenticated", Encryption.getSecurePackets(username,encryptedPassword,encryptedKey));
         }
 //        else {
 //            startAuth(manager,cryptoObject);

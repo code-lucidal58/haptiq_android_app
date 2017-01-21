@@ -1,7 +1,14 @@
 package hackfest.pheonix.haptiq;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.util.Pair;
 
+import com.scottyab.aescrypt.AESCrypt;
+
+import org.json.JSONObject;
+
+import java.security.GeneralSecurityException;
 import java.util.Random;
 
 /**
@@ -10,25 +17,65 @@ import java.util.Random;
 
 public class Encryption {
 
-    private int[] evenAllowed = new int[]{2, 4, 6, 8, 0};
-    private int[] oddAllowed = new int[]{1, 3, 5, 7, 9};
+    private static int[] evenAllowed = new int[]{2,4,6,8,0};
+    private static int[] oddAllowed = new int[]{1,3,5,7,9};
 
-    private Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey) {
-        String even = "", odd = "";
-        String eEven = "", eOdd = "";
+    private static final String SECRET="!#bbdkQE3749&(DN";
 
-        for (int i = 0; i < encryptedPassword.length(); i++) {
-            if (i % 2 == 0) {
+    public static String getEncryptedPassword(Context context, String password){
+        try{
+            String key = decryptKey(context);
+            return AESCrypt.encrypt(key, password);
+        }catch (GeneralSecurityException e){
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+    public static String getEncryptedKey(String key){
+        try{
+            return AESCrypt.encrypt(SECRET, key);
+        }catch (GeneralSecurityException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String decryptKey(Context context) throws GeneralSecurityException{
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE);
+        String key = sharedPreferences.getString(Constants.SECRET_KEY, "");
+        return AESCrypt.decrypt(SECRET, key);
+    }
+
+//    public static Pair<Packet, Packet> encryptPassword(Context context, String userId, String password){
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE);
+//        String encryptedPassword = null;
+//
+//        encryptedPassword = getEncryptedPassword(context, password);
+//
+//        String encryptedKey = null;
+//
+//        encryptedKey = sharedPreferences.getString(Constants.SECRET_KEY, "");
+//
+//        return getSecurePackets(userId, encryptedPassword, encryptedKey);
+//    }
+
+    public static Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey){
+        String even="", odd="";
+        String eEven="", eOdd="";
+
+        for(int i=0;i<encryptedPassword.length();i++){
+            if(i%2==0){
                 even += encryptedPassword.charAt(i);
-            } else {
+            }else{
                 odd += encryptedPassword.charAt(i);
             }
         }
 
-        for (int i = 0; i < encryptedKey.length(); i++) {
-            if (i % 2 == 0) {
+        for(int i=0;i<encryptedKey.length();i++){
+            if(i%2==0){
                 eEven += encryptedKey.charAt(i);
-            } else {
+            }else{
                 eOdd += encryptedKey.charAt(i);
             }
         }
@@ -47,19 +94,14 @@ public class Encryption {
         Packet p1 = new Packet(userId, even, eOdd, "mobile-authentication");
         Packet p2 = new Packet(userId, odd, eEven, "mobile-authentication");
 
-        return new Pair<>(p1, p2);
+        return new Pair<>(p1,p2);
 
     }
 
-    public class Packet {
+    public static class Packet{
         String userId, password, key, event;
-
-
-
         /*
-        socket.emit(event, {userId: userId, password: password, key: key});
-
-
+        socket.emit(packet.event, packet.getPayload());
          */
 
         public Packet(String userId, String password, String key, String event) {
@@ -99,6 +141,18 @@ public class Encryption {
 
         public void setEvent(String event) {
             this.event = event;
+        }
+
+        public JSONObject getPayload(){
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("userId", this.userId);
+                jsonObject.put("password", this.password);
+                jsonObject.put("key", this.key);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return jsonObject;
         }
     }
 

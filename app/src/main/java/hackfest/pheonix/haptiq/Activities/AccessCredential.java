@@ -19,6 +19,7 @@ import java.security.GeneralSecurityException;
 
 import hackfest.pheonix.haptiq.Constants;
 import hackfest.pheonix.haptiq.Databases.UserCredentialsDB;
+import hackfest.pheonix.haptiq.Encryption;
 import hackfest.pheonix.haptiq.Models.UserCredential;
 import hackfest.pheonix.haptiq.R;
 
@@ -68,15 +69,9 @@ public class AccessCredential extends AppCompatActivity {
                 if (urlString.isEmpty() || passwordString.isEmpty() || usernameString.isEmpty()) {
                     Toast.makeText(AccessCredential.this, "Please fill all details", Toast.LENGTH_SHORT).show();
                 } else {
-                    SharedPreferences sharedPreferences = getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE);
-                    String encryptedPassword = null;
-                    try {
-                        encryptedPassword = AESCrypt.encrypt(sharedPreferences.getString(Constants.SECRET_KEY, ""), passwordString);
-                    } catch (GeneralSecurityException e) {
-                        e.printStackTrace();
-                    }
                     userCredentialsDB.addUserCredential(
-                            new UserCredential(usernameString, encryptedPassword, urlString));
+                            new UserCredential(usernameString,
+                                    Encryption.getEncryptedPassword(AccessCredential.this,passwordString), urlString));
                     Log.e("demo", userCredentialsDB.getAllCredentials().get(0).getUrl());
                 }
             }
