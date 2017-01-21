@@ -32,6 +32,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
     compile 'com.android.support:design:25.1.0'
     compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile 'com.github.nkzawa:socket.io-client:0.3.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

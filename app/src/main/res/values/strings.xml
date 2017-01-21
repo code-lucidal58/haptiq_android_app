@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Haptiq</string>
+    <string name="desc_fingerprint">Please place your fingertip on the scanner to verify your identity</string>
+    <string name="note">(Fingerprint sign in makes your app login much faster. Your device should have at least one fingerprint registered in device settings)</string>
 </resources>
