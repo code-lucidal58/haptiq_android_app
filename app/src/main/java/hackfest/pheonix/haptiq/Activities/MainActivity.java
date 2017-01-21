@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -15,11 +14,12 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.scottyab.aescrypt.AESCrypt;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
 import hackfest.pheonix.haptiq.Constants;
@@ -87,11 +87,18 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Result Not Found. Scan again", Toast.LENGTH_LONG).show();
             } else {
                 String qrCodeResult = result.getContents();
-                Log.e("demo","QR read result "+qrCodeResult);
+                Log.e("demo", "QR read result " + qrCodeResult);
                 try {
                     JSONObject object = new JSONObject(qrCodeResult);
-                    sharedPreferences.edit().putString(Constants.CHROME_EXTENSION_ID,object.optString(Constants.CHROME_EXTENSION_ID)).apply();
-                    sharedPreferences.edit().putString(Constants.SECRET_KEY,object.optString(Constants.SECRET_KEY)).apply();
+                    sharedPreferences.edit().putString(Constants.CHROME_EXTENSION_ID, object.optString(Constants.CHROME_EXTENSION_ID)).apply();
+                    String secretKey = object.optString(Constants.SECRET_KEY);
+                    String encryptedKey = null;
+                    try {
+                        encryptedKey = AESCrypt.encrypt("!#bbdkQE3749&(DN", secretKey);
+                    } catch (GeneralSecurityException e) {
+                        e.printStackTrace();
+                    }
+                    sharedPreferences.edit().putString(Constants.SECRET_KEY, encryptedKey).apply();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

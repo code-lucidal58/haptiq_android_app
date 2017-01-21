@@ -1,12 +1,7 @@
 package hackfest.pheonix.haptiq;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v4.util.Pair;
 
-import com.scottyab.aescrypt.AESCrypt;
-
-import java.security.GeneralSecurityException;
 import java.util.Random;
 
 /**
@@ -15,44 +10,25 @@ import java.util.Random;
 
 public class Encryption {
 
-    private int[] evenAllowed = new int[]{2,4,6,8,0};
-    private int[] oddAllowed = new int[]{1,3,5,7,9};
+    private int[] evenAllowed = new int[]{2, 4, 6, 8, 0};
+    private int[] oddAllowed = new int[]{1, 3, 5, 7, 9};
 
-    public Pair<Packet, Packet> encryptPassword(Context context, String userId, String password){
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE);
-        String encryptedPassword = null;
-        try{
-            encryptedPassword = AESCrypt.encrypt(sharedPreferences.getString(Constants.SECRET_KEY, ""), sharedPreferences.getString(Constants.KEY_PASSWORD, ""));
-        }catch (GeneralSecurityException e){
-            e.printStackTrace();
-        }
+    private Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey) {
+        String even = "", odd = "";
+        String eEven = "", eOdd = "";
 
-        String encryptedKey = null;
-        try{
-            encryptedKey = AESCrypt.encrypt("!#bbdkQE3749&(DN", sharedPreferences.getString(Constants.SECRET_KEY, ""));
-        }catch (GeneralSecurityException e){
-            e.printStackTrace();
-        }
-
-        return getSecurePackets(userId, encryptedPassword, encryptedKey);
-    }
-
-    private Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey){
-        String even="", odd="";
-        String eEven="", eOdd="";
-
-        for(int i=0;i<encryptedPassword.length();i++){
-            if(i%2==0){
+        for (int i = 0; i < encryptedPassword.length(); i++) {
+            if (i % 2 == 0) {
                 even += encryptedPassword.charAt(i);
-            }else{
+            } else {
                 odd += encryptedPassword.charAt(i);
             }
         }
 
-        for(int i=0;i<encryptedKey.length();i++){
-            if(i%2==0){
+        for (int i = 0; i < encryptedKey.length(); i++) {
+            if (i % 2 == 0) {
                 eEven += encryptedKey.charAt(i);
-            }else{
+            } else {
                 eOdd += encryptedKey.charAt(i);
             }
         }
@@ -71,11 +47,11 @@ public class Encryption {
         Packet p1 = new Packet(userId, even, eOdd, "mobile-authentication");
         Packet p2 = new Packet(userId, odd, eEven, "mobile-authentication");
 
-        return new Pair<>(p1,p2);
+        return new Pair<>(p1, p2);
 
     }
 
-    public class Packet{
+    public class Packet {
         String userId, password, key, event;
 
 

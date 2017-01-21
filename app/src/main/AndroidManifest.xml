@@ -16,11 +16,7 @@
         <activity
             android:name=".Activities.MainActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <service android:name=".Firebase.CustomFirebaseInstance">
@@ -36,7 +32,13 @@
 
         <receiver android:name=".Firebase.MyWakefulBroadcastReceiver" />
 
-        <activity android:name=".Activities.AccessCredential" />
+        <activity android:name=".Activities.AccessCredential" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".Activities.Fingerprint"></activity>
     </application>
 

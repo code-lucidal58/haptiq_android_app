@@ -53,7 +53,7 @@ public class UserCredentialsDB extends SQLiteOpenHelper{
      */
 
     // Adding new credential
-    void addUserCredential(UserCredential uc) {
+    public void addUserCredential(UserCredential uc) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
