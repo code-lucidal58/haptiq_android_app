@@ -20,25 +20,9 @@ public class AccessCredential extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_access_credential);
 
-        url = (AutoCompleteTextView) findViewById(R.id.url);
-        username = (EditText)findViewById(R.id.username);
-        password = (EditText)findViewById(R.id.password);
+        url = (AutoCompleteTextView) findViewById(R.id.urlEditText);
+        username = (EditText)findViewById(R.id.usernameEditText);
+        password = (EditText)findViewById(R.id.passwordEditText);
 
-        url.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
     }
 }

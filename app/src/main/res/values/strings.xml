@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Haptiq</string>
     <string name="desc_fingerprint">Please place your fingertip on the scanner to verify your identity</string>
-    <string name="note">(Fingerprint sign in makes your app login much faster. Your device should have at least one fingerprint registered in device settings)</string>
+    <string name="note">(Fingerprint sign in makes your app login much faster. Your device should have at least one fingerprint
+        registered in device settings)</string>
+
+    <string name="welcome_note">Welcome to Haptiq!</string>
+    <string name="welcome_description">You are not connected to any desktop. Generate a QR code using our Haptiq extension
+    and scan it with the app.</string>
 </resources>

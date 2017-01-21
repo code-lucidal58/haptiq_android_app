@@ -5,6 +5,8 @@ import android.util.Log;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
+import hackfest.pheonix.haptiq.Constants;
+
 /**
  * Created by aanisha
  */
@@ -16,7 +18,6 @@ public class CustomFirebaseInstance extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d("demo", "Refreshed token: " + refreshedToken);
 
-        // TODO: Implement this method to send any registration to your app's servers.
-        //sendRegistrationToServer(refreshedToken);
+        getSharedPreferences(Constants.PREF_IDS,MODE_PRIVATE).edit().putString(Constants.FCM_ID,refreshedToken).apply();
     }
 }

@@ -12,7 +12,10 @@ public class Constants {
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_URL = "url";
 
-
-    //token eGPJY6zaChY:APA91bGNKqHweQvVUujHN2yGaLm2oum9flIZXzMhvFk0d-imJ2axGppbCgf6BvynB6SL7yknATcTTHSO7oUGweZz8210ME1YsqXtknMyuBxsBWfUyDHfBOsfLc7NPV47IZIwJpxGslcI
-
+    public static final String SOCKET_IP = "http://52.25.225.108";
+    public static final String PREF_IDS = "socketIdSharedPreferences";
+    public static final String SOCKET_ID = "phoneId";
+    public static final String CHROME_EXTENSION_ID = "chromeId";
+    public static final String FCM_ID = "fcmId";
+    public static final String SECRET_KEY = "secretKey";
 }
