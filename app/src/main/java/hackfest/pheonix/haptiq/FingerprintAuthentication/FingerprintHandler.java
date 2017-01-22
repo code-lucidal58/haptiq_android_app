@@ -3,14 +3,21 @@ package hackfest.pheonix.haptiq.FingerprintAuthentication;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.github.nkzawa.socketio.client.Socket;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import hackfest.pheonix.haptiq.Constants;
 import hackfest.pheonix.haptiq.Databases.UserCredentialsDB;
@@ -76,7 +83,6 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
         TextView textView = (TextView) ((Activity)context).findViewById(R.id.errorText);
         textView.setText(e);
         if(success){
-            textView.setTextColor(ContextCompat.getColor(context,R.color.colorPrimaryDark));
             UserCredentialsDB userCredentialsDB = new UserCredentialsDB(context);
             UserCredential uc = userCredentialsDB.getCredential(context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
                     .getString(Constants.TO_SEARCH_URL,""));
@@ -84,7 +90,20 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
             String encryptedPassword = uc.getPassword();
             String encryptedKey =context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
                     .getString(Constants.SECRET_KEY,"");
-            socket.emit("mobile-authenticated", Encryption.getSecurePackets(username,encryptedPassword,encryptedKey));
+            Log.e("demo",username);
+            Log.e("demo",encryptedPassword);
+            Log.e("demo",encryptedKey);
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("chromeId", context.getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE).getString(Constants.CHROME_EXTENSION_ID, ""));
+                jsonObject.put("userId", username);
+                jsonObject.put("password", encryptedPassword);
+            }catch (Exception ce){
+                ce.printStackTrace();
+            }
+            socket.emit("mobile-authenticated", jsonObject);
+//            ((Activity) context).finish();
         }
 //        else {
 //            startAuth(manager,cryptoObject);

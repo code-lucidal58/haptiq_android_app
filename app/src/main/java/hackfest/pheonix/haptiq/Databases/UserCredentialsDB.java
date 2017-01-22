@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class UserCredentialsDB extends SQLiteOpenHelper{
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -53,33 +55,40 @@ public class UserCredentialsDB extends SQLiteOpenHelper{
      */
 
     // Adding new credential
-    public void addUserCredential(UserCredential uc) {
+    public boolean addUserCredential(UserCredential uc) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_USERNAME, uc.getUsername());
-        values.put(KEY_PASSWORD, uc.getPassword());
-        values.put(KEY_URL, uc.getUrl());
+        boolean b=true;
+            ContentValues values = new ContentValues();
+            values.put(KEY_USERNAME, uc.getUsername());
+            values.put(KEY_PASSWORD, uc.getPassword());
+            values.put(KEY_URL, uc.getUrl());
 
-        // Inserting Row
-        db.insert(TABLE_NAME, null, values);
+            // Inserting Row
+            db.insert(TABLE_NAME, null, values);
+            b=true;
+
         db.close(); // Closing database connection
+        return b;
     }
 
     // Getting single credential
     public UserCredential getCredential(String url) {
         SQLiteDatabase db = this.getReadableDatabase();
 
+        Log.e("SQL ", "url: "+url);
         Cursor cursor = db.query(TABLE_NAME, new String[] { KEY_ID,
                         KEY_USERNAME, KEY_PASSWORD, KEY_URL}, KEY_URL + "=?",
                 new String[] { url }, null, null, null, null);
-        if (cursor != null)
+        if (cursor != null) {
             cursor.moveToFirst();
 
-        UserCredential userCredential = new UserCredential(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2), cursor.getString(3));
+            UserCredential userCredential = new UserCredential(Integer.parseInt(cursor.getString(0)),
+                    cursor.getString(1), cursor.getString(2), cursor.getString(3));
 
-        return userCredential;
+            return userCredential;
+        }
+        return null;
     }
 
     // Getting All Credentials

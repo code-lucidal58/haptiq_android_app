@@ -60,7 +60,7 @@ public class Encryption {
 //        return getSecurePackets(userId, encryptedPassword, encryptedKey);
 //    }
 
-    public static Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey){
+    public static Pair<Packet, Packet> getSecurePackets(String userId, String encryptedPassword, String encryptedKey, String chromeId){
         String even="", odd="";
         String eEven="", eOdd="";
 
@@ -91,24 +91,25 @@ public class Encryption {
         eEven = evenAllowed[ke] + eEven;
         eOdd = oddAllowed[ko] + eOdd;
 
-        Packet p1 = new Packet(userId, even, eOdd, "mobile-authentication");
-        Packet p2 = new Packet(userId, odd, eEven, "mobile-authentication");
+        Packet p1 = new Packet(userId, even, eOdd, "mobile-authentication", chromeId);
+        Packet p2 = new Packet(userId, odd, eEven, "mobile-authentication", chromeId);
 
         return new Pair<>(p1,p2);
 
     }
 
     public static class Packet{
-        String userId, password, key, event;
+        String userId, password, key, event, chromeId;
         /*
         socket.emit(packet.event, packet.getPayload());
          */
 
-        public Packet(String userId, String password, String key, String event) {
+        public Packet(String userId, String password, String key, String event, String chromeId) {
             this.userId = userId;
             this.password = password;
             this.key = key;
             this.event = event;
+            this.chromeId = chromeId;
         }
 
         public String getUserId() {
@@ -149,6 +150,7 @@ public class Encryption {
                 jsonObject.put("userId", this.userId);
                 jsonObject.put("password", this.password);
                 jsonObject.put("key", this.key);
+                jsonObject.put("chromeId", this.chromeId);
             }catch (Exception e){
                 e.printStackTrace();
             }

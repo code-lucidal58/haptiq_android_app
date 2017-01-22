@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -14,20 +15,20 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.scottyab.aescrypt.AESCrypt;
 
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 
 import hackfest.pheonix.haptiq.Constants;
+import hackfest.pheonix.haptiq.Encryption;
 import hackfest.pheonix.haptiq.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button scanCode, fingerprint;
+    Button scanCode, addNewCredentials;
+    TextView pairingStatus;
     IntentIntegrator intentIntegrator;
     private Socket mSocket;
     SharedPreferences sharedPreferences;
@@ -38,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedPreferences = getSharedPreferences(Constants.PREF_IDS, MODE_PRIVATE);
+        scanCode = (Button) findViewById(R.id.scanCode);
+        pairingStatus = (TextView) findViewById(R.id.pairingStatus);
+        addNewCredentials = (Button) findViewById(R.id.addCredentials);
         //Connect to socket and get id
         try {
             mSocket = IO.socket(Constants.SOCKET_IP);
@@ -59,8 +63,16 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        scanCode = (Button) findViewById(R.id.scanCode);
-        fingerprint = (Button) findViewById(R.id.fingerprint);
+        boolean isChromeExists = sharedPreferences.getBoolean(Constants.CHROME_ID_EXISTS, false);
+
+        if (isChromeExists) {
+            pairingStatus.setVisibility(View.VISIBLE);
+            pairingStatus.setText("This device is already paired with a Chrome Extension with Extension ID " +
+                    sharedPreferences.getString(Constants.CHROME_EXTENSION_ID, ""));
+        } else {
+            pairingStatus.setVisibility(View.GONE);
+        }
+
         intentIntegrator = new IntentIntegrator(this);
         scanCode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,10 +81,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fingerprint.setOnClickListener(new View.OnClickListener() {
+        addNewCredentials.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, Fingerprint.class));
+                startActivity(new Intent(MainActivity.this, AccessCredential.class));
+                finish();
             }
         });
     }
@@ -87,28 +100,24 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Result Not Found. Scan again", Toast.LENGTH_LONG).show();
             } else {
                 String qrCodeResult = result.getContents();
-                Log.e("demo", "QR read result " + qrCodeResult);
                 try {
+                    //QR result contains chrome extension Id and secret key
                     JSONObject object = new JSONObject(qrCodeResult);
-                    Log.e("qr chromeId check", object.optString(Constants.CHROME_EXTENSION_ID));
                     sharedPreferences.edit().putString(Constants.CHROME_EXTENSION_ID, object.optString(Constants.CHROME_EXTENSION_ID)).apply();
                     String secretKey = object.optString(Constants.SECRET_KEY);
-                    String encryptedKey = null;
-                    try {
-                        encryptedKey = AESCrypt.encrypt("!#bbdkQE3749&(DN", secretKey);
-                    } catch (GeneralSecurityException e) {
-                        e.printStackTrace();
-                    }
+                    String encryptedKey = Encryption.getEncryptedKey(secretKey);
                     sharedPreferences.edit().putString(Constants.SECRET_KEY, encryptedKey).apply();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                //Create data to be sent for pairing
                 HashMap<String, String> socketPairingData = new HashMap<>();
                 socketPairingData.put(Constants.CHROME_EXTENSION_ID, sharedPreferences.getString(Constants.CHROME_EXTENSION_ID, ""));
                 socketPairingData.put(Constants.SOCKET_ID, sharedPreferences.getString(Constants.SOCKET_ID, ""));
                 socketPairingData.put(Constants.FCM_ID, sharedPreferences.getString(Constants.FCM_ID, ""));
                 JSONObject jsonObject = new JSONObject(socketPairingData);
-                Log.e("demo", jsonObject.toString());
+
                 // Send request for pairing
                 mSocket.emit("pairing", jsonObject);
                 startActivity(new Intent(MainActivity.this, AccessCredential.class));

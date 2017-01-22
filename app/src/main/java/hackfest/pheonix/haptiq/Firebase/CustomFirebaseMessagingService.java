@@ -52,8 +52,8 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
             e.printStackTrace();
         }
         if (chromeId.equals(getSharedPreferences(Constants.PREF_IDS, MODE_PRIVATE).getString(Constants.CHROME_EXTENSION_ID, ""))) {
-            String urlCapital = url.toUpperCase();
-            url = urlCapital.substring(0,1) + url.substring(1,url.length());
+//            String urlCapital = url.toUpperCase();
+//            url = urlCapital.substring(0,1) + url.substring(1,url.length());
 
             getSharedPreferences(Constants.PREF_IDS,MODE_PRIVATE).edit().putString(Constants.TO_SEARCH_URL,url).apply();
 
