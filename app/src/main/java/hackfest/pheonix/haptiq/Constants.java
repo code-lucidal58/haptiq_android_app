@@ -12,7 +12,7 @@ public class Constants {
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_URL = "url";
 
-    public static final String SOCKET_IP = "http://52.25.225.108";
+    public static final String SOCKET_IP = "http://jibinmathews.in";
     public static final String PREF_IDS = "socketIdSharedPreferences";
     public static final String SOCKET_ID = "phoneId";
     public static final String CHROME_EXTENSION_ID = "chromeId";

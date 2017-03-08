@@ -1,11 +1,13 @@
 package hackfest.pheonix.haptiq.FingerprintAuthentication;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -29,13 +32,14 @@ import hackfest.pheonix.haptiq.R;
  * Created by aanisha
  */
 
+@TargetApi(Build.VERSION_CODES.M)
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {
 
 
     private Context context;
-    private FingerprintManager manager;
-    FingerprintManager.CryptoObject cryptoObject;
-    Socket socket;
+    private Socket socket;
+    private boolean isForBrowser = false;
+
 
     // Constructor
     public FingerprintHandler(Context mContext) {
@@ -43,10 +47,9 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     }
 
 
-    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject, Socket socket) {
-        this.manager = manager;
-        this.cryptoObject = cryptoObject;
+    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject, Socket socket, boolean isForBrowser) {
         this.socket=socket;
+        this.isForBrowser = isForBrowser;
         CancellationSignal cancellationSignal = new CancellationSignal();
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -83,26 +86,35 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
         TextView textView = (TextView) ((Activity)context).findViewById(R.id.errorText);
         textView.setText(e);
         if(success){
-            UserCredentialsDB userCredentialsDB = new UserCredentialsDB(context);
-            UserCredential uc = userCredentialsDB.getCredential(context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
-                    .getString(Constants.TO_SEARCH_URL,""));
-            String username = uc.getUsername();
-            String encryptedPassword = uc.getPassword();
-            String encryptedKey =context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
-                    .getString(Constants.SECRET_KEY,"");
-            Log.e("demo",username);
-            Log.e("demo",encryptedPassword);
-            Log.e("demo",encryptedKey);
 
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("chromeId", context.getSharedPreferences(Constants.PREF_IDS, Context.MODE_PRIVATE).getString(Constants.CHROME_EXTENSION_ID, ""));
-                jsonObject.put("userId", username);
-                jsonObject.put("password", encryptedPassword);
-            }catch (Exception ce){
-                ce.printStackTrace();
+                jsonObject.put("success", true);
+            } catch (JSONException e1) {
+                e1.printStackTrace();
             }
-            socket.emit("mobile-authenticated", jsonObject);
+            if(isForBrowser){
+                socket.emit("browser-authentication", jsonObject);
+            }else{
+                UserCredentialsDB userCredentialsDB = new UserCredentialsDB(context);
+                UserCredential uc = userCredentialsDB.getCredential(context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
+                        .getString(Constants.TO_SEARCH_URL,""));
+                String username = uc.getUsername();
+                String encryptedPassword = uc.getPassword();
+                String encryptedKey =context.getSharedPreferences(Constants.PREF_IDS,Context.MODE_PRIVATE)
+                        .getString(Constants.SECRET_KEY,"");
+                Log.e("demo",username);
+                Log.e("demo",encryptedPassword);
+                Log.e("demo",encryptedKey);
+                try {
+                    jsonObject.put("userId", username);
+                    jsonObject.put("password", encryptedPassword);
+                }catch (Exception ce){
+                    ce.printStackTrace();
+                }
+                socket.emit("mobile-authenticated", jsonObject);
+            }
 //            ((Activity) context).finish();
         }
 //        else {

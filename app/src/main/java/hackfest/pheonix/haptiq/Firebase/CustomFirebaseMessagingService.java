@@ -34,7 +34,21 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Notification Message Body: " + remoteMessage.getData());
         Map<String,String> message = remoteMessage.getData();
         sendNotification(message);
-        startActivity(new Intent(this, Fingerprint.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+
+        JSONObject jsonObject = getObjectFromMessage(message);
+
+        Intent intent = new Intent(this, Fingerprint.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if(jsonObject.optString("type").equals("browser-authentication")){
+            intent.putExtra("type", "browser");
+        }
+
+        startActivity(intent);
+    }
+
+    private JSONObject getObjectFromMessage(Map<String, String> message){
+        return new JSONObject(message);
     }
 
 
@@ -44,16 +58,14 @@ public class CustomFirebaseMessagingService extends FirebaseMessagingService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         String chromeId = "", url = "";
+        JSONObject jsonObject = getObjectFromMessage(messageBody);
         try {
-            JSONObject jsonObject = new JSONObject(messageBody);
             chromeId = jsonObject.optString(Constants.CHROME_EXTENSION_ID);
             url = jsonObject.optString(Constants.KEY_URL);
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (chromeId.equals(getSharedPreferences(Constants.PREF_IDS, MODE_PRIVATE).getString(Constants.CHROME_EXTENSION_ID, ""))) {
-//            String urlCapital = url.toUpperCase();
-//            url = urlCapital.substring(0,1) + url.substring(1,url.length());
 
             getSharedPreferences(Constants.PREF_IDS,MODE_PRIVATE).edit().putString(Constants.TO_SEARCH_URL,url).apply();
 

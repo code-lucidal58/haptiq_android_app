@@ -48,6 +48,8 @@ public class Fingerprint extends AppCompatActivity {
     FingerprintManager fingerprintManager = null;
     Socket socket;
 
+    Boolean isForBrowser = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +59,10 @@ public class Fingerprint extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.activity_fingerprint);
 
+        Bundle bundle = getIntent().getExtras();
+        if(bundle.getString("type") != null){
+            isForBrowser = "browser".equals(bundle.getString("type"));
+        }
 
         // Initializing both Android Keyguard Manager and Fingerprint Manager
         keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
@@ -166,7 +172,7 @@ public class Fingerprint extends AppCompatActivity {
                         if (cipherInit()) {
                             FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(cipher);
                             FingerprintHandler helper = new FingerprintHandler(this);
-                            helper.startAuth(fingerprintManager, cryptoObject, socket);
+                            helper.startAuth(fingerprintManager, cryptoObject, socket, isForBrowser);
                         }
                     }
                 }
